@@ -15,6 +15,9 @@ from loaders.chimera_dataset import Chimera
 from torchvision.datasets import FashionMNIST, Omniglot
 from augmentations import get_composed_augmentations
 from augmentations.augmentations import ToGray, Invert, Fragment
+### SJY 2022-05-24
+import loaders.load_from_h5 as load_from_h5
+###
 
 
 OOD_SIZE = 32  # common image size for OOD detection experiments
@@ -103,6 +106,12 @@ def get_dataset(data_dict, split_type=None, data_aug=None, dequant=None):
         dataset = MNIST_OOD(data_path, split=split_type, download=True,
                             transform=Compose(l_transform))
         dataset.img_size = (size, size)
+    ### SJY 2022-05-24
+    elif name == 'ownAnomaly':
+        print(split_type)
+        data_path = ['./datasets/ownAnomaly/Anomaly_dataset.h5']
+        dataset = load_from_h5.FeatureDataset(data_path).get_dataset(split_type=split_type)
+    ###
 
     elif name == 'MNISTpad_OOD':
         dataset = MNIST_OOD(data_path, split=split_type, download=True,

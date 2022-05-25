@@ -1,4 +1,5 @@
 import itertools
+from math import sqrt
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -159,6 +160,62 @@ class ConvNet2FC(nn.Module):
     def forward(self, x):
         return self.net(x)
 
+##############################
+class MLP_enc(nn.Module):
+    def __init__(self, in_dim, out_dim, out_activation='linear'):
+        super(MLP_enc, self).__init__()
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        
+        self.fc1 = nn.Linear(self.in_dim,1024)
+        self.fc2 = nn.Linear(1024,512)
+        self.fc3 = nn.Linear(512,256)
+        self.fc4 = nn.Linear(256,self.out_dim)
+        self.out_activation = get_activation(out_activation)
+        
+        layers = [self.fc1,
+                nn.ReLU(),
+                self.fc2,
+                nn.ReLU(),
+                self.fc3,
+                nn.ReLU(),
+                self.fc4,]
+        if self.out_activation is not None:
+            layers.append(self.out_activation)
+
+        self.net = nn.Sequential(*layers)
+
+    def forward(self,x):
+        return self.net(x.view(-1,self.in_dim))
+
+class MLP_dec(nn.Module):
+    def __init__(self, in_dim, out_dim, out_activation='sigmoid'):
+        super(MLP_dec, self).__init__()
+        self.in_dim = in_dim
+        self.out_dim = out_dim
+        
+        self.fc1 = nn.Linear(self.in_dim,256)
+        self.fc2 = nn.Linear(256,512)
+        self.fc3 = nn.Linear(512,1024)
+        self.fc4 = nn.Linear(1024,self.out_dim)
+        self.out_activation = get_activation(out_activation)
+        self.in_dim = in_dim
+
+        layers = [self.fc1,
+                nn.ReLU(),
+                self.fc2,
+                nn.ReLU(),
+                self.fc3,
+                nn.ReLU(),
+                self.fc4,]
+        if self.out_activation is not None:
+            layers.append(self.out_activation)
+
+        self.net = nn.Sequential(*layers)
+
+    def forward(self,x):
+        return self.net(x).view(-1,1,int(sqrt(self.out_dim)),int(sqrt(self.out_dim)))
+##############################
 
 class DeConvNet2(nn.Module):
     def __init__(self, in_chan=1, out_chan=1, nh=8, out_activation='linear',

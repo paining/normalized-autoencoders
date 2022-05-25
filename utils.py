@@ -139,13 +139,37 @@ def mkdir_p(path):
             raise
 
 
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import roc_auc_score, roc_curve, precision_recall_curve
 def roc_btw_arr(arr1, arr2):
     true_label = np.concatenate([np.ones_like(arr1),
                                  np.zeros_like(arr2)])
     score = np.concatenate([arr1, arr2])
     return roc_auc_score(true_label, score)
 
+####### SJY 2022-05-24
+"""FPR, TPR 계산 및 ROC 커브 시각화 위해 추가"""
+def roc_curve_arr(arr1, arr2):
+    true_label = np.concatenate([np.ones_like(arr1),
+                                 np.zeros_like(arr2)])
+    score = np.concatenate([arr1, arr2])
+    fpr, tpr, threshold = roc_curve(true_label, score)
+    return tpr, fpr, threshold
+
+"""Optima threshold 계산"""
+def get_optimal(arr1,arr2):
+    true_label = np.concatenate([np.ones_like(arr1),
+                                 np.zeros_like(arr2)])
+    score = np.concatenate([arr1,arr2])
+    precision, recall, thresholds = precision_recall_curve(true_label,score)
+    a = 2 * precision * recall
+    b = precision + recall
+    f1 = np.divide(a,b,out=np.zeros_like(a),where=b!=0)
+    threshold = thresholds[np.argmax(f1)]
+    print('precision',precision[np.argmax(f1)])
+    print('recall',recall[np.argmax(f1)])
+    return threshold
+
+########
 
 def batch_run(m, dl, device, flatten=False, method='predict', input_type='first', no_grad=True, **kwargs):
     """

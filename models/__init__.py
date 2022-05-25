@@ -21,6 +21,10 @@ from models.modules import (
     IGEBMEncoder,
     ConvNet64,
     DeConvNet64,
+    ### SJY 2022-05-24
+    MLP_enc,
+    MLP_dec,
+    ### SJY 2022-05-24
 )
 from models.modules_sngan import Generator as SNGANGeneratorBN
 from models.modules_sngan import GeneratorNoBN as SNGANGeneratorNoBN
@@ -138,6 +142,20 @@ def get_net(in_dim, out_dim, **kwargs):
             out_activation=out_activation,
             num_groups=num_groups,
         )
+    ### SJY 2022-05-24
+    elif kwargs["arch"] == "mlp_enc":
+        net = MLP_enc(
+            in_dim = in_dim,
+            out_dim = out_dim,
+            out_activation=out_activation
+        )
+    elif kwargs["arch"] == "mlp_dec":
+        net = MLP_dec(
+            in_dim = in_dim,
+            out_dim = out_dim,
+            out_activation=out_activation
+        )
+    ###
 
     return net
 
@@ -224,6 +242,9 @@ def get_model(cfg, *args, version=None, **kwargs):
     name = model_dict["arch"]
     model = _get_model_instance(name)
     model = model(**model_dict)
+    ################ SJY 2022-05-24
+    print(model)
+    ################
     return model
 
 
